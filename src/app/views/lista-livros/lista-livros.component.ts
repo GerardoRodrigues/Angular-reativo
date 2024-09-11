@@ -1,6 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { Item, Livro } from 'src/app/model/Interfaces';
+import { FormControl } from '@angular/forms';
+import { map, switchMap } from 'rxjs';
+import { Item } from 'src/app/model/Interfaces';
 import { LivroVolumeInfo } from 'src/app/model/LivroVolumeInfo';
 import { LivroService } from 'src/app/service/livro.service';
 
@@ -11,18 +12,14 @@ import { LivroService } from 'src/app/service/livro.service';
 })
 export class ListaLivrosComponent implements OnDestroy{
 
-  listaLivro: Livro[];
-  campoBusca = '';
-  subscription: Subscription;
+  campoBusca = new FormControl();
 
   constructor(private service: LivroService) { }
 
-  buscar(){
-    this.subscription = this.service.buscar(this.campoBusca).subscribe({
-      next: item => this.listaLivro = this.livrosResultado(item),
-      error: erro => console.error(erro),
-    });
-  }
+  livrosEncontrados$ = this.campoBusca.valueChanges.pipe(
+    switchMap((valorDigitado) => this.service.buscar(valorDigitado)),
+    map((items) => this.livrosResultado(items))
+  )
 
   livrosResultado(items: Item[]): LivroVolumeInfo[]{
     return items.map(item => {
@@ -31,7 +28,6 @@ export class ListaLivrosComponent implements OnDestroy{
   }
 
   ngOnDestroy(): void {
-      this.subscription.unsubscribe();
   }
 }
 
