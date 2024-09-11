@@ -42,5 +42,5 @@ export interface Item{
 
 export interface LivroResultado{
     items: Item[];
-    totelItem: number;
+    totalItems: number;
 }

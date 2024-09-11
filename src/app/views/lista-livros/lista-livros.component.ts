@@ -1,7 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { catchError, debounceTime, distinctUntilChanged, EMPTY, filter, map, switchMap, throwError } from 'rxjs';
-import { Item } from 'src/app/model/Interfaces';
+import { Item, LivroResultado } from 'src/app/model/Interfaces';
 import { LivroVolumeInfo } from 'src/app/model/LivroVolumeInfo';
 import { LivroService } from 'src/app/service/livro.service';
 
@@ -13,7 +13,8 @@ import { LivroService } from 'src/app/service/livro.service';
 export class ListaLivrosComponent implements OnDestroy{
 
   campoBusca = new FormControl();
-  mensagemErro: string
+  mensagemErro: string;
+  livroResultado: LivroResultado;
 
   constructor(private service: LivroService) { }
 
@@ -22,6 +23,8 @@ export class ListaLivrosComponent implements OnDestroy{
     filter(valorDigitado => valorDigitado.length >= 3),
     switchMap((valorDigitado) => this.service.buscar(valorDigitado)),
     distinctUntilChanged(),
+    map(resultado => this.livroResultado = resultado),
+    map((resultado) => resultado.items ?? []),
     map((items) => this.livrosResultado(items)),
     catchError(() => {
       this.mensagemErro = 'Ops, ocorreu um erro. Recarregue a página.';
